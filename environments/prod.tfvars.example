@@ -1,0 +1,48 @@
+# ============================================================================
+# Production Environment Configuration
+# ============================================================================
+# Copy this file to prod.tfvars and update with your values
+# DO NOT commit prod.tfvars to git (it's in .gitignore)
+# ============================================================================
+
+# Azure Configuration
+azure_region = "eastus"
+
+# Common Tags
+common_tags = {
+  Environment = "Production"
+  ManagedBy   = "Terraform"
+  Project     = "Databricks-Platform"
+  CostCenter  = "Engineering"
+  Owner       = "Platform-Team"
+  Compliance  = "Required"
+}
+
+# Databricks Configuration
+databricks_workspace_sku = "premium"
+
+# Feature Flags
+enable_private_endpoints      = true
+enable_serverless_compute     = true
+enable_unity_catalog          = true
+enable_workspace_bindings     = true
+enable_auto_dns_zones         = true
+
+# Network Configuration
+vnet_address_space = ["10.1.0.0/16"]
+
+# Workspace Configuration
+workspace_public_network_access_enabled = false  # Private access only
+
+# Storage Configuration
+storage_account_tier             = "Standard"
+storage_account_replication_type = "GRS"  # Geo-redundant for production
+
+# SQL Warehouse Configuration
+sql_warehouse_cluster_size = "Medium"
+sql_warehouse_min_clusters = 2
+sql_warehouse_max_clusters = 10
+
+# Budget Configuration
+monthly_budget_threshold = 10000  # USD
+

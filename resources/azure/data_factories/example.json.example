@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "adf-databricks-dev",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "public_network_enabled": false,
+  "managed_virtual_network_enabled": true,
+  "identity_type": "SystemAssigned",
+  "private_endpoint_config": {
+    "enabled": false,
+    "subnet_id": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/virtualNetworks/{vnet-name}/subnets/{subnet-name}",
+    "private_dns_zone_ids": {
+      "datafactory": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/privateDnsZones/privatelink.datafactory.azure.net",
+      "portal": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/privateDnsZones/privatelink.adf.azure.com"
+    },
+    "comment": "Set enabled to true to create private endpoints for Data Factory"
+  },
+  "tags": {
+    "environment": "dev",
+    "purpose": "data-integration",
+    "managed_by": "terraform"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "enabled": false,
+  "name": "isolated_external_location",
+  "url": "abfss://data@stdatabricksdev001.dfs.core.windows.net/external/",
+  "credential_name": "storage_credential_dev",
+  "isolation_mode": "ISOLATION_MODE_ISOLATED",
+  "workspace_ids": [
+    "${module.workspaces[\"dev-workspace\"].workspace_id}",
+    "${module.workspaces[\"test-workspace\"].workspace_id}"
+  ],
+  "binding_type": "BINDING_TYPE_READ_WRITE",
+  "comment": "External location with workspace binding - only accessible from specified workspaces. workspace_ids are dynamically resolved from workspace module outputs.",
+  "read_only": false,
+  "owner": "account users",
+  "force_destroy": false,
+  "skip_validation": false
+}
+

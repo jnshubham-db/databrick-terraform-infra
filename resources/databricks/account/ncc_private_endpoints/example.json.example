@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "network_connectivity_config_id": "ncc-12345678-1234-1234-1234-123456789012",
+  "resource_id": "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/rg-databricks-prod/providers/Microsoft.Storage/storageAccounts/stdatabricksprod001",
+  "group_id": "blob",
+  "comment": "Static example: Creates a private endpoint rule for Azure storage account blob service. The resource_id is the full Azure resource ID of the storage account."
+}
+

@@ -1,0 +1,125 @@
+{
+  "enabled": true,
+  "workspace_name": "dbx-ws-auto-dns",
+  "resource_group_name": "rg-databricks-prod",
+  "location": "eastus",
+  "sku": "premium",
+  "managed_resource_group_name": "dbx-ws-auto-dns-managed-rg",
+  "vnet_config": {
+    "name": "vnet-databricks-auto-dns",
+    "address_space": ["10.100.0.0/16"],
+    "public_subnet_name": "snet-databricks-public",
+    "public_subnet_cidr": "10.100.0.0/18",
+    "private_subnet_name": "snet-databricks-private",
+    "private_subnet_cidr": "10.100.64.0/18",
+    "nsg_name": "nsg-databricks-auto-dns",
+    "additional_subnets": [
+      {
+        "name": "snet-workspace-private-endpoints",
+        "address_prefixes": ["10.100.128.0/22"],
+        "private_endpoint_network_policies": "Disabled",
+        "service_endpoints": [
+          "Microsoft.Storage",
+          "Microsoft.Sql",
+          "Microsoft.EventHub"
+        ],
+        "comment": "Subnet for workspace private endpoint with 1024 IPs and service endpoints"
+      },
+      {
+        "name": "snet-browser-private-endpoints",
+        "address_prefixes": ["10.100.132.0/22"],
+        "private_endpoint_network_policies": "Disabled",
+        "comment": "Subnet for browser authentication private endpoint with 1024 IPs"
+      }
+    ]
+  },
+  "private_endpoints": {
+    "enabled": true,
+    "create_dns_zones": true,
+    "dns_zone_resource_group_name": "rg-databricks-prod",
+    "use_additional_subnets": true,
+    "workspace_subnet_name": "snet-workspace-private-endpoints",
+    "browser_subnet_name": "snet-browser-private-endpoints",
+    "additional_vnet_links": [],
+    "comment": "SUBNET OPTIONS: (1) use_additional_subnets=true + subnet names for subnets in additional_subnets, (2) workspace_subnet_id/browser_subnet_id for external subnets. DNS OPTIONS: (1) create_dns_zones=true for automatic DNS, (2) private_dns_zone_id for manual DNS zone."
+  },
+  "no_public_ip": true,
+  "public_network_access_enabled": false,
+  "network_security_group_rules_required": "NoAzureDatabricksRules",
+  "tags": {
+    "environment": "prod",
+    "project": "analytics",
+    "managed_by": "terraform",
+    "dns_management": "automatic"
+  },
+  "_documentation": {
+    "description": "Complete workspace configuration with all available options",
+    "features": [
+      "✅ VNet and subnets created automatically",
+      "✅ Private DNS zones (automatic or manual)",
+      "✅ Private endpoints with flexible subnet options",
+      "✅ Service endpoints on workspace PE subnet",
+      "✅ Support for external subnets",
+      "✅ Everything in one deployment!"
+    ],
+    "subnet_configuration_options": {
+      "option_1_additional_subnets": {
+        "description": "Use subnets defined in additional_subnets array",
+        "config": {
+          "use_additional_subnets": true,
+          "workspace_subnet_name": "snet-workspace-private-endpoints",
+          "browser_subnet_name": "snet-browser-private-endpoints"
+        },
+        "when_to_use": "When subnets are created as part of this workspace VNet"
+      },
+      "option_2_external_subnets": {
+        "description": "Use existing external subnets (from different VNet or pre-created)",
+        "config": {
+          "workspace_subnet_id": "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}",
+          "browser_subnet_id": "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}"
+        },
+        "when_to_use": "When using pre-existing subnets from hub VNet or another VNet"
+      },
+      "option_3_shared_subnet": {
+        "description": "Use single subnet for both private endpoints",
+        "config": {
+          "subnet_id": "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}"
+        },
+        "when_to_use": "Simple deployments with single PE subnet"
+      }
+    },
+    "dns_configuration_options": {
+      "option_1_automatic_dns": {
+        "description": "Automatically create and manage DNS zones",
+        "config": {
+          "create_dns_zones": true,
+          "dns_zone_resource_group_name": "rg-databricks-prod"
+        },
+        "dns_zone_created": "privatelink.azuredatabricks.net",
+        "when_to_use": "New deployments without existing DNS infrastructure"
+      },
+      "option_2_manual_dns": {
+        "description": "Use existing DNS zone",
+        "config": {
+          "private_dns_zone_id": "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/privateDnsZones/privatelink.azuredatabricks.net"
+        },
+        "when_to_use": "Hub-spoke architecture with centralized DNS zones"
+      }
+    },
+    "deployment_steps": [
+      "1. Copy this file to your-workspace.json",
+      "2. Update resource names and CIDR ranges",
+      "3. Choose subnet configuration option (see subnet_configuration_options)",
+      "4. Choose DNS configuration option (see dns_configuration_options)",
+      "5. Run: terraform init && terraform plan",
+      "6. Run: terraform apply"
+    ],
+    "important_notes": [
+      "Only ONE DNS zone (privatelink.azuredatabricks.net) is needed for both private endpoints",
+      "When using external subnets, ensure they have private_endpoint_network_policies=Disabled",
+      "DNS zones are automatically linked to the workspace VNet when create_dns_zones=true",
+      "For hub-spoke architecture, use manual DNS zone and add VNet links via additional_vnet_links"
+    ]
+  }
+}
+

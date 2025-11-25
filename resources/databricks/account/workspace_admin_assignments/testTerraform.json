@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "workspace_id": "${module.workspaces[\"sjwstest2\"].workspace_id}",
+  "service_principal_application_ids": [
+    "d118594b-a1db-41b2-a6e2-a201377c2aec"
+  ],
+  "comment": "Adds service principal as workspace admin using account-level API. workspace_id is dynamically resolved from workspace module."
+}

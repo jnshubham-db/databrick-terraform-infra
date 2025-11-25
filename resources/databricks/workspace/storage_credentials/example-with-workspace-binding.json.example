@@ -1,0 +1,19 @@
+{
+  "enabled": false,
+  "name": "isolated_storage_credential",
+  "azure_managed_identity": {
+    "access_connector_id": "${module.access_connectors[\"ac-databricks-dev\"].id}"
+  },
+  "isolation_mode": "ISOLATION_MODE_ISOLATED",
+  "workspace_ids": [
+    "${module.workspaces[\"dev-workspace\"].workspace_id}",
+    "${module.workspaces[\"test-workspace\"].workspace_id}"
+  ],
+  "binding_type": "BINDING_TYPE_READ_WRITE",
+  "comment": "Storage credential with workspace binding - only accessible from specified workspaces. Both access_connector_id and workspace_ids are dynamically resolved.",
+  "owner": "account users",
+  "read_only": false,
+  "force_destroy": false,
+  "skip_validation": false
+}
+

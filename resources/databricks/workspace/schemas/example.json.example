@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "catalog_name": "dev_catalog",
+  "name": "bronze",
+  "comment": "Bronze layer schema for raw data ingestion",
+  "owner": "account users",
+  "force_destroy": false,
+  "properties": {
+    "layer": "bronze",
+    "data_classification": "raw"
+  },
+  "permissions": [
+    {
+      "principal": "data-engineers",
+      "privileges": ["USE_SCHEMA", "CREATE_TABLE", "CREATE_VIEW", "CREATE_FUNCTION"]
+    },
+    {
+      "principal": "data-analysts",
+      "privileges": ["USE_SCHEMA", "SELECT"]
+    },
+    {
+      "service_principal_name": "etl-pipeline-sp",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}

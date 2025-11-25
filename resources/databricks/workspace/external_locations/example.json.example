@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "name": "external_location_dev",
+  "url": "abfss://data@stdatabricksdev001.dfs.core.windows.net/",
+  "credential_name": "storage_credential_dev",
+  "comment": "External location for development data lake",
+  "read_only": false,
+  "owner": "account users",
+  "force_destroy": false,
+  "skip_validation": false,
+  "permissions": [
+    {
+      "principal": "data-engineers",
+      "privileges": ["CREATE_EXTERNAL_TABLE", "READ_FILES", "WRITE_FILES"]
+    },
+    {
+      "principal": "data-analysts",
+      "privileges": ["READ_FILES"]
+    },
+    {
+      "user_name": "admin@company.com",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}

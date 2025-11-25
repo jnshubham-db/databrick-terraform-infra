@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "name": "Sample Query",
+  "description": "Sample query to demonstrate query creation",
+  "warehouse_id": "warehouse-id-here",
+  "query": "SELECT \n  date,\n  COUNT(*) as record_count,\n  SUM(amount) as total_amount\nFROM dev_catalog.bronze.transactions\nWHERE date >= CURRENT_DATE - INTERVAL 7 DAYS\nGROUP BY date\nORDER BY date DESC",
+  "parent_path": "/Workspace/Shared/queries",
+  "run_as_mode": "viewer",
+  "comment": "Set enabled to true and provide valid warehouse_id (SQL warehouse ID) to create this query. Uses new databricks_query resource (databricks_sql_query is deprecated)."
+}

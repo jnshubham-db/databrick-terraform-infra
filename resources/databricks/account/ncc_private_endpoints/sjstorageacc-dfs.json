@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "network_connectivity_config_id": "${module.ncc_configs[\"sj_ncc\"].network_connectivity_config_id}",
+  "resource_id": "${module.storage_accounts[\"sjstorageacc\"].id}",
+  "group_id": "dfs",
+  "comment": "Creates a private endpoint rule for storage account DFS (ADLS Gen2) service. Required for Unity Catalog external locations using abfss:// protocol. Both NCC ID and storage account resource ID are dynamically referenced."
+}
+

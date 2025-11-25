@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "workspace_id": "1234567890123456",
+  "metastore_id": "metastore-id-here",
+  "default_catalog_name": "main",
+  "comment": "Assigns the Unity Catalog metastore to the workspace. workspace_id is the Databricks workspace ID (numeric), not Azure resource ID."
+}

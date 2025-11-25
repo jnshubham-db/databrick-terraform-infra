@@ -1,0 +1,61 @@
+{
+  "enabled": true,
+  "name": "stdatabricksprod001",
+  "resource_group_name": "rg-databricks-prod",
+  "location": "eastus",
+  "account_tier": "Standard",
+  "account_replication_type": "GRS",
+  "is_hns_enabled": true,
+  "public_network_access_enabled": false,
+  "min_tls_version": "TLS1_2",
+  "network_rules": {
+    "default_action": "Deny",
+    "bypass": ["AzureServices", "Logging", "Metrics"],
+    "virtual_network_subnet_ids": [
+      "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}"
+    ],
+    "comment": "Network access restricted to private endpoints and specified subnets"
+  },
+  "containers": [
+    {
+      "name": "metastore",
+      "container_access_type": "private"
+    },
+    {
+      "name": "external-data",
+      "container_access_type": "private"
+    },
+    {
+      "name": "checkpoints",
+      "container_access_type": "private"
+    }
+  ],
+  "access_connector_id": "${module.access_connectors[\"ac-databricks-prod\"].id}",
+  "access_connector_principal_id": "${module.access_connectors[\"ac-databricks-prod\"].principal_id}",
+  "create_dns_zones": true,
+  "dns_zone_resource_group_name": "rg-databricks-prod",
+  "vnet_id": "${module.workspaces[\"prod-workspace\"].vnet_id}",
+  "additional_vnet_links": [],
+  "private_endpoints": [
+    {
+      "name": "pe-storage-dfs",
+      "subnet_id": "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}",
+      "subresource_names": ["dfs"],
+      "comment": "Private endpoint for ADLS Gen2 (Data Lake Storage) - DNS zone auto-created"
+    },
+    {
+      "name": "pe-storage-blob",
+      "subnet_id": "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}",
+      "subresource_names": ["blob"],
+      "comment": "Private endpoint for Blob Storage - DNS zone auto-created"
+    }
+  ],
+  "comment": "Production storage account with automatic DNS zone creation. Set create_dns_zones=true to automatically create privatelink.dfs.core.windows.net and privatelink.blob.core.windows.net zones and link them to the workspace VNet. Subnets are dynamically referenced from workspace module. Access connector automatically gets Blob Data Contributor role.",
+  "tags": {
+    "environment": "prod",
+    "project": "databricks",
+    "purpose": "unity-catalog",
+    "data_classification": "confidential"
+  }
+}
+

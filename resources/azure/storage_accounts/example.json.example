@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "name": "stdatabricksdev001",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "account_tier": "Standard",
+  "account_replication_type": "LRS",
+  "is_hns_enabled": true,
+  "public_network_access_enabled": false,
+  "network_rules": {
+    "default_action": "Deny",
+    "bypass": ["None"],
+    "comment": "Restrict access to private endpoints only"
+  },
+  "containers": [
+    {
+      "name": "metastore",
+      "container_access_type": "private"
+    },
+    {
+      "name": "data",
+      "container_access_type": "private"
+    },
+    {
+      "name": "logs",
+      "container_access_type": "private"
+    }
+  ],
+  "access_connector_id": "/subscriptions/{subscription-id}/resourceGroups/rg-databricks-dev/providers/Microsoft.Databricks/accessConnectors/ac-databricks-dev",
+  "comment": "Storage account for Unity Catalog metastore and data. Requires access connector for private link access.",
+  "tags": {
+    "environment": "dev",
+    "project": "databricks",
+    "purpose": "unity-catalog"
+  }
+}

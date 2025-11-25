@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "name": "metastore-dev",
+  "storage_root": "abfss://metastore@stdatabricksdev001.dfs.core.windows.net/",
+  "region": "eastus",
+  "owner": "account users",
+  "force_destroy": false,
+  "delta_sharing_scope": "INTERNAL_AND_EXTERNAL",
+  "delta_sharing_recipient_token_lifetime_in_seconds": 0,
+  "delta_sharing_organization_name": "my-organization",
+  "comment": "Unity Catalog metastore for development environment. Requires storage account and access connector to be created first."
+}

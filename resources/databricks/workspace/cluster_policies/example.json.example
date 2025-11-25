@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "name": "Standard Policy",
+  "description": "Standard cluster policy for development workloads with cost controls",
+  "definition": "{\"spark_version\":{\"type\":\"fixed\",\"value\":\"13.3.x-scala2.12\"},\"node_type_id\":{\"type\":\"allowlist\",\"values\":[\"Standard_DS3_v2\",\"Standard_DS4_v2\"]},\"autotermination_minutes\":{\"type\":\"range\",\"minValue\":10,\"maxValue\":120,\"defaultValue\":30},\"data_security_mode\":{\"type\":\"fixed\",\"value\":\"SINGLE_USER\"}}"
+}

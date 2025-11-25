@@ -1,0 +1,27 @@
+{
+  "enabled": true,
+  "name": "sj_cat",
+  "storage_root": "abfss://metastore@sjstorageacc.dfs.core.windows.net/",
+  "comment": "Unity Catalog for development environment. Requires storage account and access connector to be created first.",
+  "isolation_mode": "ISOLATED",
+  "workspace_ids": [
+    "${module.workspaces[\"sjwstest2\"].workspace_id}"
+  ],
+  "binding_type": "BINDING_TYPE_READ_WRITE",
+  "force_destroy": false,
+  "properties": {
+    "environment": "dev",
+    "team": "analytics",
+    "cost_center": "engineering"
+  },
+  "permissions": [
+    {
+      "service_principal_name": "d118594b-a1db-41b2-a6e2-a201377c2aec",
+      "privileges": ["ALL_PRIVILEGES"]
+    },
+    {
+      "user_name": "shubham.j@databricks.com",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}

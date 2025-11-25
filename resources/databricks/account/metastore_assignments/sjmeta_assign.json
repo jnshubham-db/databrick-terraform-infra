@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "workspace_id": "${module.workspaces[\"sjwstest2\"].workspace_id}",
+  "metastore_id": "${module.metastores[\"sjmeta\"].metastore_id}",
+  "comment": "Assigns the Unity Catalog metastore to the workspace."
+}
+

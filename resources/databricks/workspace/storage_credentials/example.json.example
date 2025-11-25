@@ -1,0 +1,26 @@
+{
+  "enabled": false,
+  "name": "storage_credential_dev",
+  "azure_managed_identity": {
+    "access_connector_id": "${module.access_connectors[\"ac-databricks-dev\"].id}"
+  },
+  "comment": "Storage credential using dynamic access connector reference. The access_connector_id will be automatically resolved from the access connector module output.",
+  "owner": "account users",
+  "read_only": false,
+  "force_destroy": false,
+  "skip_validation": false,
+  "permissions": [
+    {
+      "principal": "data-engineers",
+      "privileges": ["READ_FILES", "WRITE_FILES"]
+    },
+    {
+      "principal": "data-analysts",
+      "privileges": ["READ_FILES"]
+    },
+    {
+      "service_principal_name": "app-service-principal",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}

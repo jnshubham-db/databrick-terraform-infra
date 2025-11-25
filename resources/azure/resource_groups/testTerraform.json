@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "name": "testTerraform",
+  "location": "eastus",
+  "tags": {
+    "environment": "dev",
+    "project": "databricks-deployment",
+    "managed_by": "terraform"
+  }
+}

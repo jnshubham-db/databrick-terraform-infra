@@ -1,0 +1,45 @@
+{
+  "enabled": true,
+  "name": "kv-databricks-dev",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "sku_name": "standard",
+  "tenant_id": "00000000-0000-0000-0000-000000000000",
+  "soft_delete_retention_days": 90,
+  "purge_protection_enabled": true,
+  "public_network_access_enabled": false,
+  "access_policies": [
+    {
+      "object_id": "00000000-0000-0000-0000-000000000000",
+      "tenant_id": "00000000-0000-0000-0000-000000000000",
+      "key_permissions": [
+        "Get",
+        "List",
+        "Create",
+        "Delete"
+      ],
+      "secret_permissions": [
+        "Get",
+        "List",
+        "Set",
+        "Delete"
+      ],
+      "certificate_permissions": [
+        "Get",
+        "List"
+      ],
+      "comment": "Replace object_id with your service principal or user object ID"
+    }
+  ],
+  "private_endpoint_config": {
+    "enabled": false,
+    "subnet_id": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/virtualNetworks/{vnet-name}/subnets/{subnet-name}",
+    "private_dns_zone_id": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/privateDnsZones/privatelink.vaultcore.azure.net",
+    "comment": "Set enabled to true to create private endpoint for Key Vault"
+  },
+  "tags": {
+    "environment": "dev",
+    "purpose": "secrets-management",
+    "managed_by": "terraform"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "name": "sj_ncc",
+  "region": "eastus",
+  "workspace_ids": [
+    "${module.workspaces[\"sjwstest2\"].workspace_id}"
+  ],
+  "comment": "Network Connectivity Config for private connectivity to Databricks control plane. Bound to sjwstest2 workspace to enable serverless compute to use NCC private endpoints."
+}

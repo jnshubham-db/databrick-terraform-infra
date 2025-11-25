@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "ac-databricks-dev",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "identity_type": "SystemAssigned",
+  "comment": "Access Connector for Unity Catalog. The managed identity will be granted Storage Blob Data Contributor role on storage accounts.",
+  "tags": {
+    "environment": "dev",
+    "project": "databricks",
+    "purpose": "unity-catalog",
+    "managed_by": "terraform"
+  }
+}

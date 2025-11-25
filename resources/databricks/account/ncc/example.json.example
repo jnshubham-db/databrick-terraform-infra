@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "name": "ncc-dev",
+  "region": "eastus",
+  "network_connectivity_config_id": "",
+  "workspace_ids": [1234567890123456],
+  "comment": "Network Connectivity Config for private connectivity to Databricks control plane. Set enabled to true if using serverless compute with private connectivity. workspace_ids is optional - list of workspace IDs to bind this NCC to."
+}

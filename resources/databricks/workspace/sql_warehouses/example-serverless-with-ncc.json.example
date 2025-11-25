@@ -1,0 +1,31 @@
+{
+  "enabled": false,
+  "name": "Serverless Analytics Warehouse",
+  "cluster_size": "Small",
+  "min_num_clusters": 1,
+  "max_num_clusters": 3,
+  "auto_stop_mins": 120,
+  "warehouse_type": "PRO",
+  "enable_photon": true,
+  "enable_serverless_compute": true,
+  "spot_instance_policy": "COST_OPTIMIZED",
+  "channel": "CHANNEL_NAME_CURRENT",
+  "comment": "Serverless SQL warehouse that uses NCC for private connectivity. Requires: 1) NCC created and bound to workspace, 2) NCC private endpoints created and approved for storage accounts, 3) Storage credentials configured with access connector.",
+  "tags": {
+    "custom_tags": [
+      {
+        "key": "compute_type",
+        "value": "serverless"
+      },
+      {
+        "key": "network",
+        "value": "private-ncc"
+      },
+      {
+        "key": "environment",
+        "value": "production"
+      }
+    ]
+  }
+}
+

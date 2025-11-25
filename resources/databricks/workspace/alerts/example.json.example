@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "Data Quality Alert",
+  "query_id": "query-id-here",
+  "parent_path": "/Shared/Alerts",
+  "seconds_to_retrigger": 3600,
+  "custom_subject": "Alert: {{ALERT_NAME}} triggered",
+  "custom_body": "The alert {{ALERT_NAME}} was triggered at {{ALERT_TIME}}",
+  "notify_on_ok": true,
+  "condition": {
+    "op": "GREATER_THAN",
+    "empty_result_state": "OK",
+    "operand": {
+      "column": {
+        "name": "count"
+      }
+    },
+    "threshold": {
+      "value": {
+        "double_value": 1000
+      }
+    }
+  }
+}

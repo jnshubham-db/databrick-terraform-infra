@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "path": "/Shared/Analytics",
+  "comment": "Shared folder for analytics team notebooks and queries"
+}

@@ -1,0 +1,59 @@
+{
+  "enabled": true,
+  "name": "vnet-standalone-dev",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "address_space": ["10.10.0.0/16"],
+  "subnets": [
+    {
+      "name": "snet-app-tier",
+      "address_prefixes": ["10.10.1.0/24"],
+      "service_endpoints": [
+        "Microsoft.Storage",
+        "Microsoft.KeyVault"
+      ]
+    },
+    {
+      "name": "snet-data-tier",
+      "address_prefixes": ["10.10.2.0/24"],
+      "service_endpoints": [
+        "Microsoft.Storage",
+        "Microsoft.Sql"
+      ]
+    },
+    {
+      "name": "snet-private-endpoints",
+      "address_prefixes": ["10.10.3.0/24"],
+      "private_endpoint_network_policies": "Disabled"
+    }
+  ],
+  "network_security_groups": {
+    "nsg-app-tier": {
+      "name": "nsg-app-tier",
+      "security_rules": [
+        {
+          "name": "allow-https-inbound",
+          "priority": 100,
+          "direction": "Inbound",
+          "access": "Allow",
+          "protocol": "Tcp",
+          "source_port_range": "*",
+          "destination_port_range": "443",
+          "source_address_prefix": "*",
+          "destination_address_prefix": "*"
+        }
+      ]
+    }
+  },
+  "nsg_associations": {
+    "app-tier-nsg": {
+      "subnet_name": "snet-app-tier",
+      "nsg_name": "nsg-app-tier"
+    }
+  },
+  "tags": {
+    "environment": "dev",
+    "purpose": "standalone-vnet",
+    "managed_by": "terraform"
+  }
+}

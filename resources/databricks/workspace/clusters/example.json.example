@@ -1,0 +1,34 @@
+{
+  "enabled": true,
+  "cluster_name": "Analytics Cluster",
+  "spark_version": "13.3.x-scala2.12",
+  "node_type_id": "Standard_DS3_v2",
+  "autotermination_minutes": 30,
+  "data_security_mode": "SINGLE_USER",
+  "autoscale": {
+    "min_workers": 1,
+    "max_workers": 5
+  },
+  "spark_conf": {
+    "spark.databricks.delta.preview.enabled": "true",
+    "spark.sql.adaptive.enabled": "true"
+  },
+  "custom_tags": {
+    "team": "analytics",
+    "cost_center": "engineering"
+  },
+  "permissions": [
+    {
+      "group_name": "data-engineers",
+      "permission_level": "CAN_RESTART"
+    },
+    {
+      "group_name": "data-analysts",
+      "permission_level": "CAN_ATTACH_TO"
+    },
+    {
+      "user_name": "admin@company.com",
+      "permission_level": "CAN_MANAGE"
+    }
+  ]
+}

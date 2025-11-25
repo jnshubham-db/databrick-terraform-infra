@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "name": "rg-databricks-dev",
+  "location": "eastus",
+  "tags": {
+    "environment": "dev",
+    "project": "databricks",
+    "managed_by": "terraform",
+    "cost_center": "engineering"
+  }
+}

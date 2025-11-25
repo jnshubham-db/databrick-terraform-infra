@@ -1,0 +1,61 @@
+{
+  "enabled": true,
+  "name": "stdatabrickshub001",
+  "resource_group_name": "rg-databricks-hub",
+  "location": "eastus",
+  "account_tier": "Standard",
+  "account_replication_type": "GRS",
+  "is_hns_enabled": true,
+  "public_network_access_enabled": false,
+  "min_tls_version": "TLS1_2",
+  "network_rules": {
+    "default_action": "Deny",
+    "bypass": ["AzureServices", "Logging", "Metrics"],
+    "virtual_network_subnet_ids": [
+      "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}"
+    ]
+  },
+  "containers": [
+    {
+      "name": "metastore",
+      "container_access_type": "private"
+    },
+    {
+      "name": "shared-data",
+      "container_access_type": "private"
+    }
+  ],
+  "access_connector_id": "${module.access_connectors[\"ac-databricks-hub\"].id}",
+  "access_connector_principal_id": "${module.access_connectors[\"ac-databricks-hub\"].principal_id}",
+  "create_dns_zones": true,
+  "dns_zone_resource_group_name": "rg-dns-hub",
+  "vnet_id": "${module.workspaces[\"prod-workspace\"].vnet_id}",
+  "additional_vnet_links": [
+    "/subscriptions/{subscription-id}/resourceGroups/rg-network-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+    "/subscriptions/{subscription-id}/resourceGroups/rg-network-spoke1/providers/Microsoft.Network/virtualNetworks/vnet-spoke1",
+    "/subscriptions/{subscription-id}/resourceGroups/rg-network-spoke2/providers/Microsoft.Network/virtualNetworks/vnet-spoke2"
+  ],
+  "private_endpoints": [
+    {
+      "name": "pe-storage-dfs-hub",
+      "subnet_id": "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}",
+      "subresource_names": ["dfs"],
+      "comment": "Private endpoint for ADLS Gen2 - DNS zone created in hub RG and linked to all VNets"
+    },
+    {
+      "name": "pe-storage-blob-hub",
+      "subnet_id": "${module.workspaces[\"prod-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}",
+      "subresource_names": ["blob"],
+      "comment": "Private endpoint for Blob Storage - DNS zone created in hub RG and linked to all VNets"
+    }
+  ],
+  "comment": "Hub-spoke architecture with centralized DNS zones. DNS zones are created in rg-dns-hub and automatically linked to workspace VNet, hub VNet, and all spoke VNets. This ensures DNS resolution works from all connected networks.",
+  "tags": {
+    "environment": "prod",
+    "project": "databricks",
+    "purpose": "unity-catalog",
+    "architecture": "hub-spoke",
+    "data_classification": "confidential"
+  }
+}
+

@@ -1,0 +1,19 @@
+{
+  "enabled": false,
+  "name": "isolated_catalog",
+  "storage_root": "abfss://catalog@stdatabricksdev001.dfs.core.windows.net/",
+  "comment": "Catalog with workspace binding - only accessible from specified workspaces. The workspace_ids are dynamically resolved from workspace module outputs.",
+  "isolation_mode": "ISOLATED",
+  "workspace_ids": [
+    "${module.workspaces[\"dev-workspace\"].workspace_id}",
+    "${module.workspaces[\"test-workspace\"].workspace_id}"
+  ],
+  "binding_type": "BINDING_TYPE_READ_WRITE",
+  "owner": "account users",
+  "force_destroy": false,
+  "properties": {
+    "environment": "dev",
+    "team": "analytics"
+  }
+}
+

@@ -1,0 +1,207 @@
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+env:
+  TERRAFORM_VERSION: '1.5.0'
+  WORKING_DIR: '.'
+
+jobs:
+  terraform-deploy:
+    name: 'Terraform Plan and Apply'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Set Environment Variables
+        run: |
+          echo "Setting up all required environment variables..."
+          
+          echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+      
+          echo "TF_VAR_databricks_account_id=${{ secrets.DATABRICKS_ACCOUNT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_databricks_account_host=https://accounts.azuredatabricks.net" >> $GITHUB_ENV
+          
+          echo "TF_VAR_databricks_workspace_host=" >> $GITHUB_ENV
+          echo "TF_VAR_databricks_workspace_resource_id=" >> $GITHUB_ENV
+        
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan - Phase 1 (Account & Workspace Resources)
+        id: plan_phase1
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform plan \
+            -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
+            -out=tfplan-phase1 \
+            -lock=true \
+            -target=module.resource_groups \
+            -target=module.access_connectors \
+            -target=module.workspaces
+        continue-on-error: false
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan-phase1
+          path: ${{ env.WORKING_DIR }}/tfplan-phase1
+          retention-days: 5
+
+      - name: Terraform Apply - Phase 1 (Account & Workspace Resources)
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform apply \
+            -auto-approve \
+            -lock=true \
+            tfplan-phase1
+
+      - name: Get Workspace Information
+        id: get_workspace_info
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          echo "Retrieving workspace information from Terraform state..."
+          
+          WORKSPACE_HOST=$(terraform output -json workspaces 2>/dev/null | jq -r ".[\"$WORKSPACE_NAME\"].workspace_url // empty")
+          
+          if [ -z "$WORKSPACE_HOST" ]; then
+            echo "❌ Error: Could not retrieve workspace host for workspace '$WORKSPACE_NAME'"
+            exit 1
+          fi
+          
+          # Format as full URL (add https:// if not present)
+          if [[ ! "$WORKSPACE_HOST" =~ ^https?:// ]]; then
+            WORKSPACE_HOST="https://${WORKSPACE_HOST}"
+          fi
+      
+          echo "✅ Workspace Information Retrieved:"
+          echo "   Host: $WORKSPACE_HOST"
+          
+          # Update environment variables for subsequent steps
+          echo "TF_VAR_databricks_workspace_host=$WORKSPACE_HOST" >> $GITHUB_ENV
+          
+          # Set outputs for summary
+          echo "workspace_host=$WORKSPACE_HOST" >> $GITHUB_OUTPUT
+
+      - name: Terraform Plan - Phase 2 (Workspace-Level Resources)
+        id: plan_phase2
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          echo "Planning workspace-level resources with workspace authentication..."
+          terraform plan \
+            -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
+            -out=tfplan-phase2 \
+            -lock=true \
+            -refresh=true
+        continue-on-error: false
+
+      - name: Upload Plan Artifact - Phase 2
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan-phase2
+          path: ${{ env.WORKING_DIR }}/tfplan-phase2
+          retention-days: 5
+
+      - name: Terraform Apply - Phase 2 (Workspace-Level Resources)
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform apply \
+            -auto-approve \
+            -lock=true \
+            tfplan-phase2
+
+      - name: Terraform Output Summary
+        if: success()
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          echo "## 🎉 Terraform Deployment Successful ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📋 Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Terraform Version**: ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered By**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🏢 Workspace Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workspace Host**: ${{ steps.get_workspace_info.outputs.workspace_host }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workspace Resource ID**: \`${{ steps.get_workspace_info.outputs.workspace_resource_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📦 Resources Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "#### Phase 1 - Account & Workspace Level:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Azure Resource Groups" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Virtual Networks & Subnets" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Storage Accounts" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Databricks Workspaces" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Access Connectors" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Unity Catalog Metastores" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "#### Phase 2 - Workspace Resources:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Storage Credentials" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ External Locations" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Catalogs & Schemas" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Clusters & Cluster Policies" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SQL Warehouses" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Workspace Folders & Permissions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📊 Terraform Outputs" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          terraform output -json | jq '.' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment Failed Summary
+        if: failure()
+        run: |
+          echo "## ❌ Terraform Deployment Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Troubleshooting" >> $GITHUB_STEP_SUMMARY
+          echo "1. Check the step logs above for detailed error messages" >> $GITHUB_STEP_SUMMARY
+          echo "2. Verify all required secrets are configured:" >> $GITHUB_STEP_SUMMARY
+          echo "   - AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID" >> $GITHUB_STEP_SUMMARY
+          echo "   - DATABRICKS_ACCOUNT_ID" >> $GITHUB_STEP_SUMMARY
+          echo "   - TF_BACKEND_RESOURCE_GROUP, TF_BACKEND_STORAGE_ACCOUNT, TF_BACKEND_CONTAINER" >> $GITHUB_STEP_SUMMARY
+          echo "3. Ensure the Service Principal has necessary permissions" >> $GITHUB_STEP_SUMMARY
+          echo "4. Check if backend storage account exists and is accessible" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Environment" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Terraform Version**: ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY

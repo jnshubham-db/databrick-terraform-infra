@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "sjmeta",
+  "region": "eastus",
+  "owner": "d118594b-a1db-41b2-a6e2-a201377c2aec",
+  "force_destroy": true,
+  "comment": "Unity Catalog metastore for development environment. Requires storage account and access connector to be created first."
+}

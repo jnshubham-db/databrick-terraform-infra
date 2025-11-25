@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "workspace_id": 1234567890123456,
+  "service_principal_application_ids": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "comment": "Automatically adds service principals as workspace admins using account-level API. No workspace access required! Replace workspace_id and application IDs with your values."
+}

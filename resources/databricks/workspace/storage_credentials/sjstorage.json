@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "sjstorage",
+  "azure_managed_identity": {
+    "access_connector_id": "${module.access_connectors[\"sjaccesscon\"].id}"
+  },
+  "isolation_mode": "ISOLATION_MODE_ISOLATED",
+  "workspace_ids": [
+    "${module.workspaces[\"sjwstest2\"].workspace_id}"
+  ],
+  "binding_type": "BINDING_TYPE_READ_WRITE",
+  "comment": "Storage credential using dynamic access connector reference and workspace binding. The access_connector_id and workspace_ids will be automatically resolved.",
+  "owner": "shubham.j@databricks.com",
+  "read_only": false,
+  "force_destroy": false,
+  "force_update": true,
+  "skip_validation": false,
+  "permissions": [
+    {
+      "service_principal_name": "d118594b-a1db-41b2-a6e2-a201377c2aec",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}

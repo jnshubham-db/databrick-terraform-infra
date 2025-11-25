@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "workspace_id": "1234567890123456",
+  "permissions": [
+    {
+      "group_name": "data-engineers",
+      "permission_level": "USER"
+    }
+  ]
+}

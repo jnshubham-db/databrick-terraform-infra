@@ -1,0 +1,37 @@
+{
+  "enabled": true,
+  "name": "stdatabricksdev001",
+  "resource_group_name": "rg-databricks-dev",
+  "location": "eastus",
+  "account_tier": "Standard",
+  "account_replication_type": "LRS",
+  "is_hns_enabled": true,
+  "public_network_access_enabled": false,
+  "network_rules": {
+    "default_action": "Deny",
+    "bypass": ["AzureServices", "Logging", "Metrics"],
+    "virtual_network_subnet_ids": [
+      "${module.workspaces[\"my-workspace\"].subnet_ids[\"snet-workspace-private-endpoints\"]}"
+    ],
+    "comment": "Allow access from workspace subnet with service endpoints. The subnet is dynamically referenced from workspace module output."
+  },
+  "containers": [
+    {
+      "name": "metastore",
+      "container_access_type": "private"
+    },
+    {
+      "name": "data",
+      "container_access_type": "private"
+    }
+  ],
+  "access_connector_id": "${module.access_connectors[\"ac-databricks-dev\"].id}",
+  "access_connector_principal_id": "${module.access_connectors[\"ac-databricks-dev\"].principal_id}",
+  "comment": "Storage account with dynamic access connector reference. The access_connector_principal_id enables automatic role assignment (Blob Data Contributor). Replace 'ac-databricks-dev' with your access connector key and 'my-workspace' with your workspace key.",
+  "tags": {
+    "environment": "dev",
+    "project": "databricks",
+    "purpose": "unity-catalog"
+  }
+}
+

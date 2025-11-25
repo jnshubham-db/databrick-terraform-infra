@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "workspace_id": "${module.workspaces[\"my-workspace-name\"].workspace_id}",
+  "metastore_id": "${module.metastores[\"metastore-dev\"].metastore_id}",
+  "default_catalog_name": "main",
+  "comment": "Dynamic workspace assignment - workspace_id is automatically populated from the workspace module output. Replace 'my-workspace-name' with your actual workspace key from workspaces.auto.tfvars.json"
+}
+

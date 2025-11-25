@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "application_id": "00000000-0000-0000-0000-000000000000",
+  "display_name": "Terraform Service Principal",
+  "active": true,
+  "allow_cluster_create": true,
+  "allow_instance_pool_create": true,
+  "databricks_sql_access": true,
+  "workspace_access": true,
+  "workspace_ids_for_admin": [],
+  "comment": "Account-level service principal. Add workspace IDs to workspace_ids_for_admin to grant admin access to specific workspaces."
+}

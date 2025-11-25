@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "name": "ncc-prod",
+  "region": "eastus",
+  "workspace_ids": [
+    "${module.workspaces[\"prod-workspace\"].workspace_id}",
+    "${module.workspaces[\"dev-workspace\"].workspace_id}"
+  ],
+  "comment": "NCC with dynamic workspace binding. The workspace_ids will be automatically resolved from workspace module outputs. This binds the NCC to multiple workspaces, enabling serverless compute in those workspaces to use private endpoints defined in NCC private endpoint rules."
+}
+

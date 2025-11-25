@@ -1,0 +1,28 @@
+{
+  "enabled": false,
+  "name": "dev_catalog",
+  "storage_root": "abfss://catalog@stdatabricksdev001.dfs.core.windows.net/",
+  "comment": "Development catalog for analytics workloads. Set isolation_mode to ISOLATED and provide workspace_ids to bind to specific workspaces.",
+  "isolation_mode": "OPEN",
+  "owner": "account users",
+  "force_destroy": false,
+  "properties": {
+    "environment": "dev",
+    "team": "analytics",
+    "cost_center": "engineering"
+  },
+  "permissions": [
+    {
+      "principal": "data-engineers",
+      "privileges": ["USE_CATALOG", "USE_SCHEMA", "CREATE_SCHEMA", "CREATE_TABLE"]
+    },
+    {
+      "principal": "data-analysts",
+      "privileges": ["USE_CATALOG", "USE_SCHEMA", "SELECT"]
+    },
+    {
+      "group_name": "admins",
+      "privileges": ["ALL_PRIVILEGES"]
+    }
+  ]
+}
