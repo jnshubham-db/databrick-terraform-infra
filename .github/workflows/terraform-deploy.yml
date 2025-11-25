@@ -78,7 +78,7 @@ jobs:
         continue-on-error: false
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan-phase1
           path: ${{ env.WORKING_DIR }}/tfplan-phase1
@@ -132,7 +132,7 @@ jobs:
         continue-on-error: false
 
       - name: Upload Plan Artifact - Phase 2
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan-phase2
           path: ${{ env.WORKING_DIR }}/tfplan-phase2
