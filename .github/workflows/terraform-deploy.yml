@@ -53,27 +53,57 @@ jobs:
           echo "TF_VAR_databricks_account_host=https://accounts.azuredatabricks.net" >> $GITHUB_ENV
           
           echo "TF_VAR_databricks_workspace_host=" >> $GITHUB_ENV
-          echo "TF_VAR_databricks_workspace_resource_id=" >> $GITHUB_ENV
         
       - name: Terraform Init
         working-directory: ${{ env.WORKING_DIR }}
-        run: terraform init
+        env:
+          TF_LOG: DEBUG
+        run: |
+          echo "Initializing Terraform with detailed logging..."
+          terraform init -no-color 2>&1 | tee init.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform init failed. Showing detailed error log:"
+            cat init.log
+            exit 1
+          fi
+          
+          echo "✅ Terraform initialized successfully"
 
       - name: Terraform Validate
         working-directory: ${{ env.WORKING_DIR }}
-        run: terraform validate
+        run: |
+          echo "Validating Terraform configuration..."
+          terraform validate -no-color 2>&1 | tee validate.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform validation failed. Check the log above."
+            exit 1
+          fi
+          
+          echo "✅ Terraform configuration is valid"
 
       - name: Terraform Plan - Phase 1 (Account & Workspace Resources)
         id: plan_phase1
         working-directory: ${{ env.WORKING_DIR }}
         run: |
+          echo "Planning Phase 1: Account & Workspace Resources..."
           terraform plan \
             -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
             -out=tfplan-phase1 \
             -lock=true \
+            -no-color \
             -target=module.resource_groups \
             -target=module.access_connectors \
-            -target=module.workspaces
+            -target=module.workspaces 2>&1 | tee plan-phase1.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform Plan Phase 1 failed. Check the log above."
+            cat plan-phase1.log
+            exit 1
+          fi
+          
+          echo "✅ Terraform Plan Phase 1 completed successfully"
         continue-on-error: false
 
       - name: Upload Plan Artifact
@@ -86,10 +116,20 @@ jobs:
       - name: Terraform Apply - Phase 1 (Account & Workspace Resources)
         working-directory: ${{ env.WORKING_DIR }}
         run: |
+          echo "Applying Phase 1: Account & Workspace Resources..."
           terraform apply \
             -auto-approve \
             -lock=true \
-            tfplan-phase1
+            -no-color \
+            tfplan-phase1 2>&1 | tee apply-phase1.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform Apply Phase 1 failed. Check the log above."
+            cat apply-phase1.log
+            exit 1
+          fi
+          
+          echo "✅ Terraform Apply Phase 1 completed successfully"
 
       - name: Get Workspace Information
         id: get_workspace_info
@@ -97,10 +137,21 @@ jobs:
         run: |
           echo "Retrieving workspace information from Terraform state..."
           
-          WORKSPACE_HOST=$(terraform output -json workspaces 2>/dev/null | jq -r ".[\"$WORKSPACE_NAME\"].workspace_url // empty")
+          # Get the workspace URLs from output
+          WORKSPACE_URLS=$(terraform output -json workspace_urls 2>/dev/null)
+          
+          if [ -z "$WORKSPACE_URLS" ] || [ "$WORKSPACE_URLS" == "null" ]; then
+            echo "❌ Error: Could not retrieve workspace URLs from Terraform output"
+            echo "Available outputs:"
+            terraform output -json
+            exit 1
+          fi
+          
+          # Get the first workspace URL from the map
+          WORKSPACE_HOST=$(echo "$WORKSPACE_URLS" | jq -r 'to_entries[0].value // empty')
           
           if [ -z "$WORKSPACE_HOST" ]; then
-            echo "❌ Error: Could not retrieve workspace host for workspace '$WORKSPACE_NAME'"
+            echo "❌ Error: Could not extract workspace URL from output"
             exit 1
           fi
           
@@ -122,12 +173,21 @@ jobs:
         id: plan_phase2
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          echo "Planning workspace-level resources with workspace authentication..."
+          echo "Planning Phase 2: Workspace-Level Resources..."
           terraform plan \
             -var-file="environments/${{ github.event.inputs.environment || 'dev' }}.tfvars" \
             -out=tfplan-phase2 \
             -lock=true \
-            -refresh=true
+            -no-color \
+            -refresh=true 2>&1 | tee plan-phase2.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform Plan Phase 2 failed. Check the log above."
+            cat plan-phase2.log
+            exit 1
+          fi
+          
+          echo "✅ Terraform Plan Phase 2 completed successfully"
         continue-on-error: false
 
       - name: Upload Plan Artifact - Phase 2
@@ -140,10 +200,20 @@ jobs:
       - name: Terraform Apply - Phase 2 (Workspace-Level Resources)
         working-directory: ${{ env.WORKING_DIR }}
         run: |
+          echo "Applying Phase 2: Workspace-Level Resources..."
           terraform apply \
             -auto-approve \
             -lock=true \
-            tfplan-phase2
+            -no-color \
+            tfplan-phase2 2>&1 | tee apply-phase2.log
+          
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Terraform Apply Phase 2 failed. Check the log above."
+            cat apply-phase2.log
+            exit 1
+          fi
+          
+          echo "✅ Terraform Apply Phase 2 completed successfully"
 
       - name: Terraform Output Summary
         if: success()
@@ -160,7 +230,6 @@ jobs:
           
           echo "### 🏢 Workspace Information" >> $GITHUB_STEP_SUMMARY
           echo "- **Workspace Host**: ${{ steps.get_workspace_info.outputs.workspace_host }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Workspace Resource ID**: \`${{ steps.get_workspace_info.outputs.workspace_resource_id }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "### 📦 Resources Deployed" >> $GITHUB_STEP_SUMMARY
