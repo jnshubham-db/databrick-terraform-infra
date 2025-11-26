@@ -18,7 +18,6 @@ on:
         type: choice
         options:
           - dev
-          - test
           - prod
 
 env:
